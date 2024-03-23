@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intersezione tra Parabole</title>
+<!-- Includiamo la libreria Plotly per il tracciamento del grafico -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<h2>Inserisci i valori per le due parabole</h2>
+<div>
+    <label for="a1">a1:</label>
+    <input type="number" id="a1" step="any">
+    <label for="b1">b1:</label>
+    <input type="number" id="b1" step="any">
+    <br>
+    <label for="a2">a2:</label>
+    <input type="number" id="a2" step="any">
+    <label for="b2">b2:</label>
+    <input type="number" id="b2" step="any">
+    <br>
+    <button onclick="calcolaIntersezioni()">Calcola Intersezioni</button>
+</div>
+<div id="grafico"></div>
+<div id="intersezioni"></div>
+
+<script>
+// Funzione per calcolare le coordinate (x, y) della parabola dati i valori di a e b
+function parabola(a, b, x_values) {
+    let y_values = [];
+    for (let i = 0; i < x_values.length; i++) {
+        let x = x_values[i];
+        let y = a * Math.pow(x, 2) + b;
+        y_values.push(y);
+    }
+    return y_values;
+}
+
+function calcolaIntersezioni() {
+    let a1 = parseFloat(document.getElementById("a1").value);
+    let b1 = parseFloat(document.getElementById("b1").value);
+    let a2 = parseFloat(document.getElementById("a2").value);
+    let b2 = parseFloat(document.getElementById("b2").value);
+
+    let x_values = [];
+    for (let i = -10; i <= 10; i++) {
+        x_values.push(i);
+    }
+
+    let y_values1 = parabola(a1, b1, x_values);
+    let y_values2 = parabola(a2, b2, x_values);
+
+    // Troviamo i punti di intersezione calcolando i valori di y per gli stessi valori di x
+    let intersezioni = [];
+    for (let i = 0; i < x_values.length; i++) {
+        let x = x_values[i];
+        let y1 = a1 * Math.pow(x, 2) + b1;
+        let y2 = a2 * Math.pow(x, 2) + b2;
+        if (Math.abs(y1 - y2) < 0.01) { // Controllo per la precisione
+            intersezioni.push([x, y1]);
+        }
+    }
+    
+    // Tracciamo il grafico delle due parabole
+    var trace1 = {
+        x: x_values,
+        y: y_values1,
+        mode: 'lines',
+        name: `y = ${a1}x^2 + ${b1}`
+    };
+
+    var trace2 = {
+        x: x_values,
+        y: y_values2,
+        mode: 'lines',
+        name: `y = ${a2}x^2 + ${b2}`
+    };
+
+    var trace3 = {
+        x: intersezioni.map(p => p[0]),
+        y: intersezioni.map(p => p[1]),
+        mode: 'markers',
+        name: 'Punti di Intersezione',
+        marker: {size: 10, color: 'red'}
+    };
+
+    var data = [trace1, trace2, trace3];
+
+    var layout = {
+        title: 'Grafico delle due parabole sovrapposte',
+        xaxis: {title: 'x', tickmode: 'linear', tick0: -10, dtick: 1}, // Impostiamo gli step della scala x a 1
+        yaxis: {title: 'y', range: [-50, 50]}, // Impostiamo il range dell'asse y da -50 a 50
+        showlegend: true
+    };
+
+    Plotly.newPlot('grafico', data, layout);
+
+    // Visualizziamo i valori numerici dei punti di intersezione
+    document.getElementById('intersezioni').innerHTML = `Punti di intersezione:<br>${intersezioni.map(p => `(${p[0].toFixed(2)}, ${p[1].toFixed(2)})`).join('<br>')}`;
+}
+</script>
+</body>
+</html>
